@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma Personalizado — Formação GP com IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #0a0a0a; --surface: #111410; --surface2: #161a13;
+  --border: #1e2b1f; --border2: #2a3a2b;
+  --green: #4af05a; --green-dim: #1e3d22;
+  --purple: #a78bfa; --purple-dim: #1e1a38;
+  --red: #ff5c5c; --red-dim: #2e1111;
+  --amber-dim: #2e2010;
+  --muted: #5a6b5b; --text: #c8d4c8; --white: #eef2ee;
+}
+body { background: var(--black); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; min-height: 100vh; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* LOGO BAR */
+.logo-bar {
+  padding: 28px 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.logo-allevo { height: 28px; width: auto; }
+.logo-mario {
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mario-m {
+  width: 32px; height: 32px;
+  background: var(--white);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 800;
+  color: #111;
+  line-height: 1;
+}
+.logo-mario-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 800;
+  color: var(--white);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.logo-divider {
+  width: 1px; height: 28px;
+  background: var(--border2);
+  margin: 0 20px;
+}
+
+/* CONFIG */
+.config-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 28px; }
+.config-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.config-title span { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); background: var(--green-dim); padding: 3px 8px; border-radius: 4px; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.slider-row label { font-size: 12px; color: var(--muted); min-width: 180px; text-transform: uppercase; letter-spacing: 0.07em; }
+.slider-row input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; background: var(--border2); border-radius: 2px; border: none; padding: 0; }
+.slider-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--green); cursor: pointer; }
+.slider-val { font-size: 13px; font-weight: 600; color: var(--green); min-width: 44px; text-align: right; }
+.days-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 0; }
+.day-btn { padding: 5px 13px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); font-family: 'DM Sans', sans-serif; transition: all 0.12s; }
+.day-btn.on { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+
+/* METRICS */
+.metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 28px; }
+.metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.metric-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+.metric-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+.metric-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ALERT */
+.alert { border-radius: 10px; padding: 12px 16px; font-size: 13px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+.alert-warn { background: var(--amber-dim); border: 1px solid rgba(240,184,74,0.2); color: #f0d07a; }
+.alert-ok   { background: var(--green-dim); border: 1px solid rgba(74,240,90,0.15); color: var(--green); }
+
+/* LEGEND */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+/* SECTION HEADING */
+.section-heading { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 16px; margin-top: 32px; display: flex; align-items: center; gap: 10px; }
+.section-heading .tag { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+
+/* TIMELINE */
+.timeline { display: flex; flex-direction: column; }
+.tl-block { display: flex; gap: 16px; }
+.tl-left { display: flex; flex-direction: column; align-items: center; width: 40px; flex-shrink: 0; }
+.tl-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--border2); background: var(--surface); flex-shrink: 0; margin-top: 5px; z-index: 1; }
+.tl-dot.green  { background: var(--green);  border-color: var(--green); }
+.tl-dot.purple { background: var(--purple); border-color: var(--purple); }
+.tl-dot.red    { background: var(--red);    border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,92,92,0.15); }
+.tl-line { flex: 1; width: 1px; background: var(--border); min-height: 20px; }
+.tl-right { padding-bottom: 20px; flex: 1; min-width: 0; }
+.tl-period { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.tl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.tl-card.green  { border-left: 3px solid var(--green);  border-radius: 0 12px 12px 0; }
+.tl-card.purple { border-left: 3px solid var(--purple); border-radius: 0 12px 12px 0; }
+.tl-card.red    { border-left: 3px solid var(--red);    border-radius: 0 12px 12px 0; }
+.tl-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.tl-card-title  { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--white); }
+.live-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: rgba(255,92,92,0.12); color: var(--red); border: 1px solid rgba(255,92,92,0.2); white-space: nowrap; flex-shrink: 0; }
+.tl-card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { font-size: 11px; padding: 3px 9px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.06); }
+.chip.green  { background: rgba(74,240,90,0.08);   color: #4af05a;      border-color: rgba(74,240,90,0.15); }
+.chip.purple { background: rgba(167,139,250,0.08); color: var(--purple); border-color: rgba(167,139,250,0.15); }
+.chip.red    { background: rgba(255,92,92,0.08);   color: var(--red);   border-color: rgba(255,92,92,0.15); }
+
+/* ACCORDION */
+.accordion-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 8px; }
+.accordion-trigger { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; background: transparent; border: none; width: 100%; font-family: 'DM Sans', sans-serif; color: var(--white); font-size: 14px; font-weight: 500; transition: background 0.15s; }
+.accordion-trigger:hover { background: var(--surface2); }
+.accordion-trigger .arrow { font-size: 20px; color: var(--muted); transition: transform 0.25s; line-height: 1; display: inline-block; }
+.accordion-trigger.open .arrow { transform: rotate(90deg); }
+.accordion-body { display: none; padding: 0 20px 18px; overflow-x: auto; }
+.accordion-body.open { display: block; }
+
+/* TABELA */
+.week-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.week-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 0 0 10px; border-bottom: 1px solid var(--border); }
+.week-table td { padding: 9px 0; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+.week-table tr:last-child td { border-bottom: none; }
+.tag-small { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-top: 3px; }
+
+/* LIVE GRID */
+.live-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 14px; }
+.live-card { background: var(--red-dim, #2e1111); border: 1px solid rgba(255,92,92,0.2); border-radius: 10px; padding: 14px; }
+.live-card-num { font-size: 10px; font-weight: 600; color: var(--red); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 2px; }
+.live-card-date { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+.live-card-zoom { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); text-decoration: none; border-top: 1px solid rgba(255,92,92,0.15); padding-top: 8px; transition: color 0.15s; }
+.live-card-zoom:hover { color: var(--red); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGO BAR -->
+  <div class="logo-bar">
+    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzc1IiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDc3NSAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMF8xXzc5KSI+CjxwYXRoIGQ9Ik01MjYuMjc4IDUyLjY1MzRWMzguODk4NEg1ODguMjk4VjUyLjY1MzRINTI2LjI3OFpNNTQ5LjQ3OCAxMTkuMjA2VjUwLjQ1NjhINTY1LjA5OFYxMTkuMjA2SDU0OS40NzhaIiBmaWxsPSIjNENFMDQzIi8+CjxwYXRoIGQ9Ik02MTYuNDQgMTIxLjI5OEM2MTEuMzAzIDEyMS4yOTggNjA2LjgyIDEyMC40MjIgNjAyLjk3NyAxMTguNjU3QzU5OS4xMzQgMTE2Ljg5MSA1OTUuOTQ1IDExNC41MzggNTkzLjQwOSAxMTEuNTU3QzU5MC44NzMgMTA4LjU3NiA1ODguOTc4IDEwNS4yNjggNTg3LjY5NyAxMDEuNjA3QzU4Ni40MTYgOTcuOTQ1NiA1ODUuNzc2IDk0LjIwNjEgNTg1Ljc3NiA5MC4zODgyVjg4LjI5NjJDNTg1Ljc3NiA4NC4zMzQ0IDU4Ni40MTYgODAuNTAzNCA1ODcuNjk3IDc2LjgwMzFDNTg4Ljk3OCA3My4xMDI5IDU5MC44NiA2OS43OTQ5IDU5My4zNTcgNjYuOTA1M0M1OTUuODUzIDY0LjAxNTcgNTk4Ljk3NyA2MS43MDE0IDYwMi43NTUgNTkuOTc1NUM2MDYuNTMyIDU4LjI0OTYgNjEwLjg3MSA1Ny4zODY2IDYxNS43ODYgNTcuMzg2NkM2MjIuMjMgNTcuMzg2NiA2MjcuNjQxIDU4Ljc5ODcgNjMyLjAwNyA2MS42MjNDNjM2LjM3MiA2NC40NDcyIDYzOS42NTMgNjguMTQ3NCA2NDEuODQ5IDcyLjczNjhDNjQ0LjA0NSA3Ny4zMjYxIDY0NS4xNDMgODIuMjU1NSA2NDUuMTQzIDg3LjUyNDdWOTMuMTMzOUg1OTIuMjU5VjgzLjY2NzZINjM1LjQ3TDYzMC44NTYgODguMjgzMUM2MzAuODU2IDg0LjQ2NTEgNjMwLjI5NCA4MS4yMDk1IDYyOS4xNTcgNzguNDg5OEM2MjguMDIgNzUuNzgzMyA2MjYuMzQ3IDczLjY5MTMgNjI0LjE1MSA3Mi4yMjY5QzYyMS45NTUgNzAuNzYyNSA2MTkuMTU4IDcwLjAzMDIgNjE1Ljc5OSA3MC4wMzAyQzYxMi40NCA3MC4wMzAyIDYwOS41NjQgNzAuODE0NyA2MDcuMjI1IDcyLjM5NjhDNjA0Ljg4NSA3My45Nzg5IDYwMy4xMDcgNzYuMTg4NiA2MDEuODkyIDc5LjA1MjFDNjAwLjY4OSA4MS45MTU1IDYwMC4wNzUgODUuMzU0MyA2MDAuMDc1IDg5LjM5NDVDNjAwLjA3NSA5My4xMzM5IDYwMC42NjMgOTYuNDU1IDYwMS44NCA5OS4zNDQ2QzYwMy4wMTYgMTAyLjI0NyA2MDQuODA3IDEwNC41MDkgNjA3LjIyNSAxMDYuMTdDNjA5LjY0MyAxMDcuODMgNjEyLjcyNyAxMDguNjQxIDYxNi40NjYgMTA4LjY0MUM2MjAuMjA0IDEwOC42NDEgNjIzLjEzMiAxMDcuODk2IDYyNS40ODQgMTA2LjM5MkM2MjcuODI0IDEwNC44ODggNjI5LjMyNyAxMDMuMDMyIDYyOS45OTQgMTAwLjgzNUg2NDQuMTc2QzY0My4zIDEwNC45NDEgNjQxLjYxNCAxMDguNTM2IDYzOS4xMTcgMTExLjYwOUM2MzYuNjIxIDExNC42OTUgNjMzLjQ1OCAxMTcuMDc0IDYyOS42MDIgMTE4Ljc2MUM2MjUuNzU5IDEyMC40NDggNjIxLjM2NyAxMjEuMjk4IDYxNi40NjYgMTIxLjI5OEg2MTYuNDRaIiBmaWxsPSIjNENFMDQzIi8+CjxwYXRoIGQ9Ik02ODEuODU4IDEyMS4yOThDNjc2LjcyMiAxMjEuMjk4IDY3Mi4yNTEgMTIwLjQzNSA2NjguNDQ4IDExOC43MDlDNjY0LjYzMSAxMTYuOTgzIDY2MS40ODEgMTE0LjY0MiA2NTguOTk4IDExMS42NzRDNjU2LjUwMSAxMDguNzA2IDY1NC42MzIgMTA1LjM4NSA2NTMuMzkgMTAxLjcyNEM2NTIuMTQ5IDk4LjA2MzMgNjUxLjUyMSA5NC4zMjM4IDY1MS41MjEgOTAuNTA1OVY4OC40MTM4QzY1MS41MjEgODQuMzg2NyA2NTIuMTYyIDgwLjUxNjUgNjUzLjQ0MyA3Ni44MDMxQzY1NC43MjQgNzMuMTAyOSA2NTYuNjMyIDY5Ljc5NDkgNjU5LjE1NSA2Ni45MDUzQzY2MS42NzcgNjQuMDE1NyA2NjQuODQgNjEuNzAxNCA2NjguNjE4IDU5Ljk3NTVDNjcyLjM5NSA1OC4yNDk2IDY3Ni43NzQgNTcuMzg2NiA2ODEuNzU0IDU3LjM4NjZDNjg3LjAzNCA1Ny4zODY2IDY5MS43MjcgNTguMzkzNCA2OTUuODMxIDYwLjQwN0M2OTkuOTM1IDYyLjQyMDUgNzAzLjIxNiA2NS4yMzE3IDcwNS42NzMgNjguODI3M0M3MDguMTMgNzIuNDIzIDcwOS41MDMgNzYuNjA3IDcwOS44MDMgODEuMzY2NEg2OTQuODUxQzY5NC40ODUgNzguMzU5MSA2OTMuMjA0IDc1LjgwOTQgNjkxLjAwOCA3My43MTc0QzY4OC44MTIgNzEuNjI1NCA2ODUuNzI3IDcwLjU3OTQgNjgxLjc2NyA3MC41Nzk0QzY3OC40NzMgNzAuNTc5NCA2NzUuNzAyIDcxLjM5MDEgNjczLjQ2NyA3Mi45OTgzQzY3MS4yMzIgNzQuNjA2NSA2NjkuNTU5IDc2LjgyOTMgNjY4LjQ2MSA3OS42NTM1QzY2Ny4zNjMgODIuNDc3NyA2NjYuODE0IDg1LjcyMDQgNjY2LjgxNCA4OS4zOTQ1QzY2Ni44MTQgOTMuMDY4NiA2NjcuMzUgOTYuMTAyIDY2OC40MDkgOTguOTY1NEM2NjkuNDY3IDEwMS44MjkgNjcxLjExNCAxMDQuMDY1IDY3My4zNjIgMTA1LjY3M0M2NzUuNTk3IDEwNy4yODEgNjc4LjQzNCAxMDguMDkyIDY4MS44ODQgMTA4LjA5MkM2ODQuNTkgMTA4LjA5MiA2ODYuOTA0IDEwNy42MjEgNjg4LjgxMiAxMDYuNjY3QzY5MC43MiAxMDUuNzEyIDY5Mi4yMzYgMTA0LjM5MiA2OTMuMzc0IDEwMi43MDVDNjk0LjUxMSAxMDEuMDE4IDY5NS4xOSA5OS4xMDkzIDY5NS40MTMgOTYuOTkxMUg3MTAuMzY1QzcxMC4wNjUgMTAxLjgyOSA3MDguNjY2IDEwNi4wNjUgNzA2LjEzMSAxMDkuN0M3MDMuNjA4IDExMy4zMzUgNzAwLjI2MiAxMTYuMTcyIDY5Ni4xMTggMTE4LjIyNUM2OTEuOTc1IDEyMC4yNzggNjg3LjIzIDEyMS4zMTEgNjgxLjg4NCAxMjEuMzExTDY4MS44NTggMTIxLjI5OFoiIGZpbGw9IiM0Q0UwNDMiLz4KPHBhdGggZD0iTTcyMC4xMjkgMTE5LjIwNlYzOC45MTE1SDczNS40MDlWODUuNzcyN0g3MzIuNzY5QzczMi43NjkgNzkuNzU4MSA3MzMuNTQgNzQuNjU4OCA3MzUuMDgyIDcwLjQ4NzlDNzM2LjYyNCA2Ni4zMDM4IDczOC45MTIgNjMuMTEzNSA3NDEuOTU3IDYwLjkxNjlDNzQ1LjAwMyA1OC43MjAzIDc0OC44NzIgNTcuNjIyIDc1My41NjQgNTcuNjIySDc1NC4yMThDNzYxLjA0MSA1Ny42MjIgNzY2LjIwMyA1OS45NzU1IDc2OS43MTkgNjQuNjU2NEM3NzMuMjM1IDY5LjM1MDMgNzc1IDc2LjE3NTUgNzc1IDg1LjExODlWMTE5LjIxOUg3NTkuNzJWODMuNjkzN0M3NTkuNzIgNzkuOTU0MiA3NTguNjIyIDc2Ljk3MzEgNzU2LjQyNyA3NC43MjQyQzc1NC4yMzEgNzIuNDg4NCA3NTEuNDA3IDcxLjM2MzkgNzQ3Ljk1NyA3MS4zNjM5Qzc0NC4yMTkgNzEuMzYzOSA3NDEuMTk5IDcyLjU5MyA3MzguODg2IDc1LjA1MTFDNzM2LjU3MiA3Ny41MDkyIDczNS40MjIgODAuNzEyNiA3MzUuNDIyIDg0LjY3NDRWMTE5LjIxOUg3MjAuMTQyTDcyMC4xMjkgMTE5LjIwNloiIGZpbGw9IiM0Q0UwNDMiLz4KPHBhdGggZD0iTTEyNy44ODQgMEgzMi4wNjI0QzE0LjM1NDggMCAwIDE0LjM1OTcgMCAzMi4wNzMyVjEyNy45MjdDMCAxNDUuNjQgMTQuMzU0OCAxNjAgMzIuMDYyNCAxNjBIMTI3Ljg4NEMxNDUuNTkxIDE2MCAxNTkuOTQ2IDE0NS42NCAxNTkuOTQ2IDEyNy45MjdWMzIuMDczMkMxNTkuOTQ2IDE0LjM1OTcgMTQ1LjU5MSAwIDEyNy44ODQgMFoiIGZpbGw9IiMyNjI2MjYiLz4KPHBhdGggZD0iTTEwNi45NDQgMzQuMjgyOUgzOS42NDM0VjUyLjY3OTZIMTA3LjI4NFY3MC43ODg2SDUzLjAwMTZDNDIuNjYyNyA3MC43ODg2IDM0LjI4NDQgNzkuMTY5NyAzNC4yODQ0IDg5LjUxMjFWMTA2Ljk4QzM0LjI4NDQgMTE3LjMyMyA0Mi42NjI3IDEyNS43MDQgNTMuMDAxNiAxMjUuNzA0SDY0LjMwNzhDNzAuMjk0MSAxMjUuNzA0IDc1LjkyNzYgMTIyLjg0MSA3OS40NTY3IDExNy45OUw5OC45ODQzIDkxLjEyMDRDOTkuODYgODkuOTA0NCAxMDEuMjcyIDg5LjE4NTMgMTAyLjc3NSA4OS4xODUzSDEwNy4yOTdWMTI1LjY5MUgxMjUuNjg4VjUyLjk4MDNDMTI1LjY4OCA0Mi42Mzc5IDExNy4zMDkgMzQuMjU2OCAxMDYuOTcgMzQuMjU2OEwxMDYuOTQ0IDM0LjI4MjlaTTYxLjc1OSAxMDcuMzJINTIuNjYxOFY5My44OTIzQzUyLjY2MTggOTEuMzAzNCA1NC43NTMxIDg5LjIxMTQgNTcuMzQxMSA4OS4yMTE0SDc3LjNMNjUuNTM2NCAxMDUuMzk4QzY0LjY2MDcgMTA2LjYxNCA2My4yNDkgMTA3LjMzMyA2MS43NDU5IDEwNy4zMzNMNjEuNzU5IDEwNy4zMloiIGZpbGw9IiM0Q0UwNDMiLz4KPHBhdGggZD0iTTE5My40NDYgMTE4LjEzNEwyMjAuMjU0IDM5LjgyNjhIMjQ0LjM4M0wyNzIuMDUzIDExOC4xMzRIMjU2LjgyNkwyMzMuMzM4IDQ5LjkwNzdMMjM4LjY5NyA1Mi4yNjEySDIyNS40MDRMMjMwLjk4NSA0OS45MDc3TDIwOC4yNTUgMTE4LjEzNEgxOTMuNDU5SDE5My40NDZaTTIxMS44ODkgOTcuMTA4OEwyMTYuNjA3IDg0LjU1NjdIMjQ4LjU2NUwyNTMuMTc5IDk3LjEwODhIMjExLjg4OVoiIGZpbGw9IiNEQ0ZGRUQiLz4KPHBhdGggZD0iTTI5NC40NTYgMzkuODI2OEgyNzkuOTc0VjExOC4xMzRIMjk0LjQ1NlYzOS44MjY4WiIgZmlsbD0iI0RDRkZFRCIvPgo8cGF0aCBkPSJNMzI0LjI3MSAzOS44MjY4SDMwOS43ODhWMTE4LjEzNEgzMjQuMjcxVjM5LjgyNjhaIiBmaWxsPSIjRENGRkVEIi8+CjxwYXRoIGQ9Ik0zNjQuODAzIDEyMC4xNzNDMzU5Ljc5NyAxMjAuMTczIDM1NS40MTggMTE5LjMxIDM1MS42NjcgMTE3LjU5N0MzNDcuOTE1IDExNS44ODUgMzQ0LjgxOCAxMTMuNTk2IDM0Mi4zODcgMTEwLjczM0MzMzkuOTU1IDEwNy44NyAzMzguMTEyIDEwNC42NTMgMzM2Ljg1OCAxMDEuMDg0QzMzNS42MDMgOTcuNTE0MSAzMzQuOTc1IDkzLjgyNjkgMzM0Ljk3NSA5MC4wMzUxVjg4LjFDMzM0Ljk3NSA4NC4yNDI5IDMzNS42MDMgODAuNTAzNCAzMzYuODU4IDc2Ljg5NDdDMzM4LjExMiA3My4yODU5IDMzOS45NTUgNzAuMDY5NSAzNDIuMzg3IDY3LjI0NTJDMzQ0LjgxOCA2NC40MjEgMzQ3Ljg1IDYyLjE3MjEgMzUxLjQ5NyA2MC40ODU0QzM1NS4xNDQgNTguODExOCAzNTkuMzY1IDU3Ljk2MTkgMzY0LjE0OSA1Ny45NjE5QzM3MC40MzYgNTcuOTYxOSAzNzUuNjkxIDU5LjMzNDggMzc5LjkxMiA2Mi4wOTM3QzM4NC4xMzQgNjQuODUyNSAzODcuMjk3IDY4LjQzNTEgMzg5LjQwMiA3Mi44ODA2QzM5MS41MDYgNzcuMzEzMSAzOTIuNTY1IDgyLjA5ODYgMzkyLjU2NSA4Ny4yNTAyVjkyLjUwNjNIMzQxLjA5M1Y4My42MDIySDM4My40NTVMMzc5LjA2MyA4Ny45OTU0QzM3OS4wNjMgODQuMjAzNyAzNzguNTE0IDgwLjk2MSAzNzcuNDAzIDc4LjI5MzdDMzc2LjI5MiA3NS42MTMzIDM3NC42NDUgNzMuNTYwNSAzNzIuNDc1IDcyLjEyMjNDMzcwLjI5MiA3MC42OTcxIDM2Ny41MjEgNjkuOTc3OSAzNjQuMTYyIDY5Ljk3NzlDMzYwLjgwMyA2OS45Nzc5IDM1Ny44NDkgNzAuNzQ5NCAzNTUuNTM2IDcyLjI3OTJDMzUzLjIwOSA3My44MjIgMzUxLjQ1OCA3Ni4wMTg2IDM1MC4yODEgNzguODY5QzM0OS4xMDUgODEuNzMyNSAzNDguNTE3IDg1LjEzMiAzNDguNTE3IDg5LjA1NDVDMzQ4LjUxNyA5Mi43ODA5IDM0OS4wOTIgOTYuMDc1OCAzNTAuMjI5IDk4Ljk3ODVDMzUxLjM2NiAxMDEuODgxIDM1My4xNDQgMTA0LjEzIDM1NS41MzYgMTA1LjczOEMzNTcuOTI4IDEwNy4zNDcgMzYxLjAyNSAxMDguMTU3IDM2NC44MTYgMTA4LjE1N0MzNjguNjA2IDEwOC4xNTcgMzcxLjQ2OSAxMDcuNDEyIDM3My44MjIgMTA1LjkwOEMzNzYuMTc0IDEwNC40MDUgMzc3LjY3NyAxMDIuNTQ4IDM3OC4zMzEgMTAwLjMyNUgzOTEuNjI0QzM5MC44NCAxMDQuMzI2IDM4OS4yMDYgMTA3LjgxNyAzODYuNzQ4IDExMC43ODVDMzg0LjI3OCAxMTMuNzUzIDM4MS4xOTMgMTE2LjA2OCAzNzcuNDY4IDExNy43MDJDMzczLjc1NiAxMTkuMzUgMzY5LjUzNCAxMjAuMTczIDM2NC44MTYgMTIwLjE3M0gzNjQuODAzWiIgZmlsbD0iI0RDRkZFRCIvPgo8cGF0aCBkPSJNNDEzLjgwNSAxMTguMTM0TDM5NS40NjcgNjAuMDAxNkg0MTAuMjYzTDQyNy44NDMgMTE4LjEzNEg0MTMuNzkySDQxMy44MDVaTTQxNy45ODcgMTE4LjEzNFYxMDYuMzRINDMzLjQyNFYxMTguMTM0SDQxNy45ODdaTTQyMy43NzggMTE4LjEzNEw0MzkuMDA1IDYwLjAwMTZINDUyLjkzOEw0MzcuMDcxIDExOC4xMzRINDIzLjc3OFoiIGZpbGw9IiNEQ0ZGRUQiLz4KPHBhdGggZD0iTTQ4OC4xMTIgMTIwLjE3M0M0ODMuMDQgMTIwLjE3MyA0NzguNTMxIDExOS4zNSA0NzQuNTk2IDExNy43MDJDNDcwLjY2MiAxMTYuMDU1IDQ2Ny4zNTUgMTEzLjgxOSA0NjQuNjc2IDExMC45OTVDNDYxLjk5NiAxMDguMTcgNDU5Ljk1NyAxMDQuOTY3IDQ1OC41NTkgMTAxLjM5N0M0NTcuMTYgOTcuODE0OCA0NTYuNDY3IDk0LjEwMTUgNDU2LjQ2NyA5MC4yNDQzVjg4LjFDNDU2LjQ2NyA4NC4wOTkgNDU3LjE4NiA4MC4yOTQyIDQ1OC42MTEgNzYuNjcyNEM0NjAuMDM2IDczLjA2MzcgNDYyLjEyNyA2OS44NjAzIDQ2NC44ODUgNjcuMDc1M0M0NjcuNjQzIDY0LjI5MDMgNDcwLjk2MyA2Mi4wNjc1IDQ3NC44NTggNjAuNDJDNDc4Ljc1MyA1OC43NzI2IDQ4My4xNzEgNTcuOTYxOSA0ODguMDk4IDU3Ljk2MTlDNDkzLjAyNiA1Ny45NjE5IDQ5Ny41NDkgNTguNzg1NiA1MDEuNDQ0IDYwLjQyQzUwNS4zMzkgNjIuMDY3NSA1MDguNjU5IDY0LjI5MDMgNTExLjQxNyA2Ny4wNzUzQzUxNC4xNjEgNjkuODYwMyA1MTYuMjUzIDczLjA2MzcgNTE3LjY5MSA3Ni42NzI0QzUxOS4xMTUgODAuMjgxMSA1MTkuODM0IDg0LjA4NiA1MTkuODM0IDg4LjFWOTAuMjQ0M0M1MTkuODM0IDk0LjEwMTUgNTE5LjE0MSA5Ny44Mjc5IDUxNy43NDMgMTAxLjM5N0M1MTYuMzQ0IDEwNC45OCA1MTQuMjkyIDEwOC4xNyA1MTEuNTczIDExMC45OTVDNTA4Ljg1NSAxMTMuODE5IDUwNS41NDggMTE2LjA1NSA1MDEuNjUzIDExNy43MDJDNDk3Ljc1OCAxMTkuMzUgNDkzLjIzNSAxMjAuMTczIDQ4OC4wODUgMTIwLjE3M0g0ODguMTEyWk00ODguMTEyIDEwNy43MjZDNDkxLjgyNCAxMDcuNzI2IDQ5NC45NzQgMTA2LjkxNSA0OTcuNTQ5IDEwNS4zMDdDNTAwLjEyNCAxMDMuNjk5IDUwMi4wNzEgMTAxLjQ4OSA1MDMuMzkxIDk4LjY1MTZDNTA0LjcxMSA5NS44Mjc0IDUwNS4zNzggOTIuNjYzMiA1MDUuMzc4IDg5LjE1OTFDNTA1LjM3OCA4NS42NTUgNTA0LjY5OCA4Mi4yODE2IDUwMy4zMzkgNzkuNDU3NEM1MDEuOTggNzYuNjMzMiA1MDAuMDE5IDc0LjQxMDQgNDk3LjQ0NCA3Mi44MDIyQzQ5NC44NjkgNzEuMTkzOSA0OTEuNzU4IDcwLjM5NjMgNDg4LjExMiA3MC4zOTYzQzQ4NC40NjUgNzAuMzk2MyA0ODEuNDU5IDcxLjE5MzkgNDc4Ljg4NCA3Mi44MDIyQzQ3Ni4zMDkgNzQuNDEwNCA0NzQuMzQ4IDc2LjYzMzIgNDcyLjk4OSA3OS40NTc0QzQ3MS42MjkgODIuMjgxNiA0NzAuOTUgODUuNTI0MiA0NzAuOTUgODkuMTU5MUM0NzAuOTUgOTIuNzk0IDQ3MS42MDMgOTUuODI3NCA0NzIuOTM2IDk4LjY1MTZDNDc0LjI1NyAxMDEuNDc2IDQ3Ni4yMDQgMTAzLjY5OSA0NzguNzc5IDEwNS4zMDdDNDgxLjM1NCAxMDYuOTE1IDQ4NC40NjUgMTA3LjcyNiA0ODguMTEyIDEwNy43MjZaIiBmaWxsPSIjRENGRkVEIi8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMV83OSI+CjxyZWN0IHdpZHRoPSI3NzUiIGhlaWdodD0iMTYwIiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPgo=" alt="AllevoTech" class="logo-allevo">
+    <div style="display:flex;align-items:center">
+      <div class="logo-divider"></div>
+      <div class="logo-mario">
+        <div class="logo-mario-m">M</div>
+        <div class="logo-mario-text">Mario<br>Trentim</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIGURADOR -->
+  <div class="config-card">
+    <div class="config-title">Personalizar cronograma <span>Ajuste seu plano</span></div>
+    <div class="slider-row">
+      <label>Dias de estudo por semana</label>
+      <input type="range" min="1" max="7" value="3" id="sl-dias" step="1">
+      <span class="slider-val" id="sv-dias">3 dias</span>
+    </div>
+    <div class="slider-row">
+      <label>Horas por sessão</label>
+      <input type="range" min="0.5" max="4" value="1" id="sl-horas" step="0.5">
+      <span class="slider-val" id="sv-horas">1h</span>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;margin-top:16px">Dias preferidos</div>
+    <div class="days-row" id="days-row"></div>
+  </div>
+
+  <div id="output"></div>
+</div>
+
+<script>
+const nDias = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+let sel = [1,1,0,1,0,0,0];
+
+const row = document.getElementById('days-row');
+nDias.forEach(function(d,i) {
+  const b = document.createElement('button');
+  b.className = 'day-btn' + (sel[i] ? ' on' : '');
+  b.textContent = d;
+  b.onclick = function() { sel[i] = sel[i] ? 0 : 1; b.className = 'day-btn' + (sel[i] ? ' on' : ''); gerar(); };
+  row.appendChild(b);
+});
+
+document.getElementById('sl-dias').addEventListener('input', function() {
+  document.getElementById('sv-dias').textContent = this.value + (this.value == 1 ? ' dia' : ' dias');
+  gerar();
+});
+document.getElementById('sl-horas').addEventListener('input', function() {
+  document.getElementById('sv-horas').textContent = this.value + 'h';
+  gerar();
+});
+
+const ZOOM_LINK = 'https://zoom.us/j/5118355618?omn=91917155126';
+
+const MODULES = [
+  { name: 'Fundamentos da Gestão de Projetos', ch: 3,   tipo: 'disp', data: null,       cor: 'green',  chips: ['PMBOK', 'Ciclo de vida', 'TAP', 'EAP', 'Gestão de riscos'] },
+  { name: 'Gestão Ágil com Trello',            ch: 1.5, tipo: 'disp', data: null,       cor: 'green',  chips: ['Kanban', 'Trello', 'Automações', 'Fluxos'] },
+  { name: 'Gestão de Cronograma',              ch: 4,   tipo: 'disp', data: null,       cor: 'green',  chips: ['CPM', 'Caminho crítico', 'Folgas', 'Estimativas'] },
+  { name: 'Fundamentos e Carreira em Projetos',ch: 4,   tipo: 'lib',  data: '10/06/26', cor: 'purple', chips: ['PMBOK 8ª Ed.', 'Ágil', 'SMART', 'Carreira'] },
+  { name: 'Escopo, Requisitos e Entregas',     ch: 4,   tipo: 'lib',  data: '17/06/26', cor: 'purple', chips: ['EAP/WBS', 'Backlog', 'MVP', 'Scope creep'] },
+  { name: 'Cronograma, Tarefas e Orçamento',   ch: 4,   tipo: 'lib',  data: '24/06/26', cor: 'purple', chips: ['EVM', 'SPI/CPI', 'Orçamento', 'Fluxo de caixa'] },
+  { name: 'Comunicação e Liderança',           ch: 4,   tipo: 'lib',  data: '01/07/26', cor: 'purple', chips: ['Liderança', 'Conflitos', 'Feedback', 'Negociação'] },
+  { name: 'Riscos e Contingências',            ch: 4,   tipo: 'lib',  data: '08/07/26', cor: 'purple', chips: ['Matriz P×I', 'IA + riscos', 'Contingências', 'PMI'] },
+  { name: 'Engajamento de Stakeholders',       ch: 4,   tipo: 'lib',  data: '15/07/26', cor: 'purple', chips: ['Poder/Interesse', 'Engajamento', 'Resistência', 'Narrativas'] },
+  { name: 'Execução, Monitoramento e Controle',ch: 4,   tipo: 'lib',  data: '22/07/26', cor: 'purple', chips: ['PDCA', 'Dashboards', 'Desvios', 'Encerramentos'] },
+  { name: 'Tecnologia e IA em Projetos',       ch: 4,   tipo: 'lib',  data: '29/07/26', cor: 'purple', chips: ['IA Generativa', 'No-code', 'Prompt', 'Copilot'] },
+  { name: 'Projeto Real 01', ch: 3, tipo: 'live', data: '08/07/26', cor: 'red' },
+  { name: 'Projeto Real 02', ch: 3, tipo: 'live', data: '05/08/26', cor: 'red' },
+  { name: 'Projeto Real 03', ch: 3, tipo: 'live', data: '09/09/26', cor: 'red' },
+  { name: 'Projeto Real 04', ch: 3, tipo: 'live', data: '07/10/26', cor: 'red' },
+  { name: 'Projeto Real 05', ch: 3, tipo: 'live', data: '11/11/26', cor: 'red' },
+  { name: 'Projeto Real 06', ch: 3, tipo: 'live', data: '02/12/26', cor: 'red' },
+];
+
+function parseDate(str) {
+  if (!str) return null;
+  var p = str.split('/');
+  return new Date(2000 + parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+}
+function addDays(date, n) { var d = new Date(date); d.setDate(d.getDate() + n); return d; }
+function fmtDate(d) { return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }); }
+
+function gerar() {
+  var diasPorSemana  = parseInt(document.getElementById('sl-dias').value);
+  var horasPorSessao = parseFloat(document.getElementById('sl-horas').value);
+  var horasPorSemana = diasPorSemana * horasPorSessao;
+  var diasSel = nDias.filter(function(_,i){ return sel[i]; }).slice(0, diasPorSemana);
+
+  var alertHtml = horasPorSemana < 2
+    ? '<div class="alert alert-warn">⚠️ Com ' + horasPorSemana + 'h/semana pode ser difícil acompanhar o ritmo das liberações. Considere pelo menos 3h/semana.</div>'
+    : horasPorSemana >= 6
+    ? '<div class="alert alert-ok">✓ Excelente ritmo! Com ' + horasPorSemana + 'h/semana você absorve cada módulo com qualidade e sobra fôlego.</div>'
+    : '';
+
+  var startDate = new Date(2026, 4, 30);
+  var selfPaced = MODULES.filter(function(m){ return m.tipo !== 'live'; });
+  var weeks = [];
+  var modIdx = 0, modHorasFeitas = 0;
+
+  for (var w = 0; w < 56; w++) {
+    var weekStart = addDays(startDate, w * 7);
+    var weekEnd   = addDays(weekStart, 6);
+    var liveThisWeek = MODULES.filter(function(m) {
+      var d = parseDate(m.data);
+      return m.tipo === 'live' && d >= weekStart && d <= weekEnd;
+    });
+    var tarefas = [];
+    var horasRest = horasPorSemana;
+    while (horasRest > 0 && modIdx < selfPaced.length) {
+      var mod = selfPaced[modIdx];
+      var dataLib = parseDate(mod.data);
+      if (dataLib && dataLib > weekEnd) break;
+      var faltam = mod.ch - modHorasFeitas;
+      var usar   = Math.min(faltam, horasRest);
+      var t = {}; for (var k in mod) t[k] = mod[k]; t.horas = usar;
+      tarefas.push(t);
+      modHorasFeitas += usar; horasRest -= usar;
+      if (modHorasFeitas >= mod.ch) { modIdx++; modHorasFeitas = 0; }
+    }
+    if (tarefas.length === 0 && liveThisWeek.length === 0) { if (modIdx >= selfPaced.length) break; continue; }
+    weeks.push({ weekStart: weekStart, weekEnd: weekEnd, tarefas: tarefas, live: liveThisWeek });
+    if (modIdx >= selfPaced.length && liveThisWeek.length === 0) break;
+  }
+
+  var fases = [
+    { periodo: 'Disponível agora', cor: 'green', titulo: 'Fundamentos da Gestão de Projetos',
+      desc: '3 módulos disponíveis (8,5h total). Acesse quando quiser — você tem os 12 meses da formação para concluir. Ideal para começar antes das liberações do módulo principal.',
+      chips: ['Fundamentos GP · 3h','Gestão Ágil com Trello · 1,5h','Gestão de Cronograma · 4h'], live: false },
+    { periodo: 'Jun – Jul/26 · liberação semanal', cor: 'purple', titulo: 'O Gestor de Projetos',
+      desc: '8 módulos de 4h cada, liberados toda semana a partir de 10/06. Você tem os 12 meses da formação para concluir — estude no seu ritmo.',
+      chips: ['Fundamentos e Carreira · 10/06','Escopo · 17/06','Cronograma · 24/06','Comunicação · 01/07','Riscos · 08/07','Stakeholders · 15/07','Execução · 22/07','IA em Projetos · 29/07'], live: false },
+    { periodo: 'Jul – Dez/26 · um por mês', cor: 'red', titulo: 'Projetos Reais — encontros ao vivo',
+      desc: '6 encontros ao vivo de 3h cada, um por mês. São os únicos momentos com data e hora fixas — bloqueie a agenda com antecedência.',
+      chips: ['PR 01 · 08/jul','PR 02 · 05/ago','PR 03 · 09/set','PR 04 · 07/out','PR 05 · 11/nov','PR 06 · 02/dez'], live: true },
+  ];
+
+  var weekRows = '';
+  weeks.forEach(function(w, i) {
+    var range = fmtDate(w.weekStart) + ' – ' + fmtDate(w.weekEnd);
+    w.live.forEach(function(l) {
+      weekRows += '<tr>'
+        + '<td style="color:var(--muted);font-size:12px">—</td>'
+        + '<td style="color:var(--muted);font-size:12px">' + l.data + '</td>'
+        + '<td><div style="color:var(--white)">' + l.name + '</div>'
+        + '<span class="tag-small" style="background:rgba(255,92,92,0.12);color:var(--red);border:1px solid rgba(255,92,92,0.2)">🔴 AO VIVO · 3h</span></td>'
+        + '<td style="font-family:\'Syne\',sans-serif;font-weight:700;color:var(--red);text-align:right">3h</td></tr>';
+    });
+    w.tarefas.forEach(function(t) {
+      var cor = t.cor === 'green' ? 'var(--green)' : 'var(--purple)';
+      var tag = t.tipo === 'disp'
+        ? '<span class="tag-small" style="background:rgba(74,240,90,0.08);color:#4af05a;border:1px solid rgba(74,240,90,0.15)">disponível agora</span>'
+        : '<span class="tag-small" style="background:rgba(167,139,250,0.08);color:var(--purple);border:1px solid rgba(167,139,250,0.15)">lib. ' + t.data + '</span>';
+      var hStr = t.horas % 1 === 0 ? t.horas + 'h' : t.horas.toFixed(1) + 'h';
+      weekRows += '<tr>'
+        + '<td style="color:var(--muted);font-size:12px">S' + (i+1) + '</td>'
+        + '<td style="color:var(--muted);font-size:12px">' + range + '</td>'
+        + '<td><div style="color:var(--white)">' + t.name + '</div>' + tag + '</td>'
+        + '<td style="font-family:\'Syne\',sans-serif;font-weight:700;color:' + cor + ';text-align:right">' + hStr + '</td></tr>';
+    });
+  });
+
+  var tlHtml = fases.map(function(f, i) {
+    var isLast = i === fases.length - 1;
+    return '<div class="tl-block">'
+      + '<div class="tl-left"><div class="tl-dot ' + f.cor + '"></div>' + (!isLast ? '<div class="tl-line"></div>' : '') + '</div>'
+      + '<div class="tl-right">'
+      + '<div class="tl-period">' + f.periodo + '</div>'
+      + '<div class="tl-card ' + f.cor + '">'
+      + '<div class="tl-card-header"><div class="tl-card-title">' + f.titulo + '</div>'
+      + (f.live ? '<span class="live-badge">Ao vivo</span>' : '') + '</div>'
+      + '<div class="tl-card-desc">' + f.desc + '</div>'
+      + '<div class="chips">' + f.chips.map(function(c){ return '<span class="chip ' + f.cor + '">' + c + '</span>'; }).join('') + '</div>'
+      + '</div></div></div>';
+  }).join('');
+
+  var zoomIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.276A1 1 0 0121 8.65v6.7a1 1 0 01-1.447.894L15 14"/><rect x="3" y="8" width="12" height="8" rx="2"/></svg>';
+  var liveDates = ['08/07/26','05/08/26','09/09/26','07/10/26','11/11/26','02/12/26'];
+  var liveCards = liveDates.map(function(d, i) {
+    return '<div class="live-card">'
+      + '<div class="live-card-num">Projeto Real ' + String(i+1).padStart(2,'0') + '</div>'
+      + '<div class="live-card-date">' + d.slice(0,5) + '</div>'
+      + '<a href="' + ZOOM_LINK + '" target="_blank" class="live-card-zoom">' + zoomIcon + ' Entrar no Zoom</a>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('output').innerHTML =
+    '<div style="margin-bottom:8px">'
+    + '<div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:8px">Formação em Gestão de Projetos com IA</div>'
+    + '<h1 style="font-family:\'Syne\',sans-serif;font-size:clamp(24px,5vw,34px);font-weight:800;color:var(--white);line-height:1.1;margin-bottom:8px">Seu cronograma<br>personalizado</h1>'
+    + '<p style="font-size:14px;color:var(--muted)">Plano para <strong style="color:var(--white)">' + diasPorSemana + ' dia(s) × ' + horasPorSessao + 'h/sessão</strong> — ' + diasSel.join(', ') + '</p>'
+    + '</div>'
+    + '<div style="height:3px;background:var(--border);border-radius:2px;margin:20px 0 28px;overflow:hidden"><div style="height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--purple),var(--red));border-radius:2px"></div></div>'
+    + '<div class="metrics-row">'
+    + '<div class="metric-card"><div class="metric-lbl">Horas por semana</div><div class="metric-val" style="color:var(--green)">' + horasPorSemana + 'h</div><div class="metric-sub">' + diasPorSemana + ' dia(s) × ' + horasPorSessao + 'h</div></div>'
+    + '<div class="metric-card"><div class="metric-lbl">Encontros ao vivo</div><div class="metric-val" style="color:var(--red)">6</div><div class="metric-sub">projetos reais · 1 por mês</div></div>'
+    + '</div>'
+    + alertHtml
+    + '<div class="section-heading">Visão geral da formação <span class="tag" style="background:var(--green-dim);color:var(--green)">3 fases</span></div>'
+    + '<div class="legend">'
+    + '<span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Disponível agora</span>'
+    + '<span class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span>Liberado na data</span>'
+    + '<span class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Ao vivo</span>'
+    + '</div>'
+    + '<div class="timeline">' + tlHtml + '</div>'
+    + '<div class="section-heading" style="margin-top:36px">Semana a semana</div>'
+    + '<div class="accordion-wrap">'
+    + '<button class="accordion-trigger" id="acc-trigger" onclick="toggleAcc()">'
+    + '<span style="font-size:13px;color:var(--muted)" id="acc-label">Ver ' + weeks.length + ' semanas mapeadas</span>'
+    + '<span class="arrow">›</span></button>'
+    + '<div class="accordion-body" id="acc-body">'
+    + '<table class="week-table"><thead><tr>'
+    + '<th style="width:32px">#</th><th style="width:110px">Período</th><th>Conteúdo</th><th style="width:40px;text-align:right">CH</th>'
+    + '</tr></thead><tbody>' + weekRows + '</tbody></table>'
+    + '</div></div>'
+    + '<div style="margin-top:32px;padding:24px;border:1px solid var(--border);border-radius:14px;background:var(--surface)">'
+    + '<h3 style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:var(--white);margin-bottom:4px">Datas que não podem ser perdidas 🔴</h3>'
+    + '<p style="font-size:13px;color:var(--muted)">Encontros ao vivo via Zoom. Bloqueie esses dias na sua agenda agora.</p>'
+    + '<div class="live-grid">' + liveCards + '</div>'
+    + '</div>'
+    + '<div id="cta-download" style="margin-top:28px;padding:24px;border:1px solid var(--border2);border-radius:14px;background:var(--surface);text-align:center">'
+    + '<div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Leve seu plano com você</div>'
+    + '<p style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--white);margin-bottom:6px">Baixe seu cronograma personalizado</p>'
+    + '<p style="font-size:13px;color:var(--muted);margin-bottom:20px;max-width:420px;margin-left:auto;margin-right:auto">Planilha editável com todas as semanas, módulos, datas e status para você acompanhar seu progresso.</p>'
+    + '<button id="btn-dl" onclick="baixarPlanilha()" style="background:var(--green);color:#0a0a0a;border:none;border-radius:10px;padding:13px 28px;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px">'
+    + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+    + ' Baixar planilha editável (.xlsx)</button>'
+    + '</div>';
+    + '</div>';
+}
+
+function toggleAcc() {
+  var body    = document.getElementById('acc-body');
+  var trigger = document.getElementById('acc-trigger');
+  var label   = document.getElementById('acc-label');
+  var isOpen  = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  trigger.classList.toggle('open', !isOpen);
+  label.textContent = isOpen ? 'Ver ' + document.querySelectorAll('#acc-body tbody tr').length + ' semanas mapeadas' : 'Fechar calendário';
+}
+
+function baixarPlanilha() {
+  var dias    = parseInt(document.getElementById('sl-dias').value);
+  var horas   = parseFloat(document.getElementById('sl-horas').value);
+  var hsem    = dias * horas;
+  var diasSel = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].filter(function(_,i){ return sel[i]; }).slice(0,dias);
+  var ZOOM    = 'https://zoom.us/j/5118355618?omn=91917155126';
+
+  var mods = [
+    {name:'Fundamentos da Gestão de Projetos', ch:3,   tipo:'disp', data:null,       fase:'Fundamentos'},
+    {name:'Gestão Ágil com Trello',            ch:1.5, tipo:'disp', data:null,       fase:'Fundamentos'},
+    {name:'Gestão de Cronograma',              ch:4,   tipo:'disp', data:null,       fase:'Fundamentos'},
+    {name:'Fundamentos e Carreira em Projetos',ch:4,   tipo:'lib',  data:'10/06/26', fase:'O Gestor de Projetos'},
+    {name:'Escopo, Requisitos e Entregas',     ch:4,   tipo:'lib',  data:'17/06/26', fase:'O Gestor de Projetos'},
+    {name:'Cronograma, Tarefas e Orçamento',   ch:4,   tipo:'lib',  data:'24/06/26', fase:'O Gestor de Projetos'},
+    {name:'Comunicação e Liderança',           ch:4,   tipo:'lib',  data:'01/07/26', fase:'O Gestor de Projetos'},
+    {name:'Riscos e Contingências',            ch:4,   tipo:'lib',  data:'08/07/26', fase:'O Gestor de Projetos'},
+    {name:'Engajamento de Stakeholders',       ch:4,   tipo:'lib',  data:'15/07/26', fase:'O Gestor de Projetos'},
+    {name:'Execução, Monitoramento e Controle',ch:4,   tipo:'lib',  data:'22/07/26', fase:'O Gestor de Projetos'},
+    {name:'Tecnologia e IA em Projetos',       ch:4,   tipo:'lib',  data:'29/07/26', fase:'O Gestor de Projetos'},
+    {name:'Projeto Real 01',ch:3,tipo:'live',data:'08/07/26',fase:'Projetos Reais'},
+    {name:'Projeto Real 02',ch:3,tipo:'live',data:'05/08/26',fase:'Projetos Reais'},
+    {name:'Projeto Real 03',ch:3,tipo:'live',data:'09/09/26',fase:'Projetos Reais'},
+    {name:'Projeto Real 04',ch:3,tipo:'live',data:'07/10/26',fase:'Projetos Reais'},
+    {name:'Projeto Real 05',ch:3,tipo:'live',data:'11/11/26',fase:'Projetos Reais'},
+    {name:'Projeto Real 06',ch:3,tipo:'live',data:'02/12/26',fase:'Projetos Reais'},
+  ];
+
+  function pd(s) {
+    if (!s) return null;
+    var p = s.split('/');
+    return new Date(2000+parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+  }
+  function addD(d,n){ var r=new Date(d); r.setDate(r.getDate()+n); return r; }
+  function fmt(d){ return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+  var start = new Date(2026,4,30);
+  var sp    = mods.filter(function(m){ return m.tipo !== 'live'; });
+  var weeks = [], mi = 0, md = 0;
+
+  for (var w = 0; w < 56; w++) {
+    var ws = addD(start, w*7), we = addD(ws, 6);
+    var lw = mods.filter(function(m){
+      var d = pd(m.data);
+      return m.tipo === 'live' && d && d >= ws && d <= we;
+    });
+    var tasks = [], rest = hsem;
+    while (rest > 0 && mi < sp.length) {
+      var mod = sp[mi], dl = pd(mod.data);
+      if (dl && dl > we) break;
+      var need = mod.ch - md, use = Math.min(need, rest);
+      tasks.push(Object.assign({}, mod, {horas: use}));
+      md += use; rest -= use;
+      if (md >= mod.ch) { mi++; md = 0; }
+    }
+    if (!tasks.length && !lw.length) { if (mi >= sp.length) break; continue; }
+    weeks.push({ws:ws, we:we, tasks:tasks, live:lw});
+    if (mi >= sp.length && !lw.length) break;
+  }
+
+  /* ── Aba 1: Cronograma ── */
+  var sheetRows = [];
+  sheetRows.push(['Formação em Gestão de Projetos com IA — AllevoTech', '', '', '', '', '', '', '', '', '']);
+  sheetRows.push(['Plano: '+dias+' dia(s) x '+horas+'h/sessão — '+diasSel.join(', '), '', '', '', '', '', '', '', '', '']);
+  sheetRows.push([]);
+  sheetRows.push(['Semana','Início','Fim','Módulo','Fase','Tipo','Data de acesso','CH','Status','Observações']);
+
+  weeks.forEach(function(wk, i) {
+    wk.live.forEach(function(lv) {
+      sheetRows.push(['S'+(i+1), fmt(wk.ws), fmt(wk.we), lv.name, lv.fase, 'Ao vivo', lv.data, '3h', '', '']);
+    });
+    wk.tasks.forEach(function(t) {
+      var tipo = t.tipo === 'disp' ? 'Disponível agora' : 'Liberado na data';
+      var hs   = t.horas % 1 === 0 ? t.horas+'h' : t.horas.toFixed(1)+'h';
+      sheetRows.push(['S'+(i+1), fmt(wk.ws), fmt(wk.we), t.name, t.fase, tipo, t.data || 'Já disponível', hs, '', '']);
+    });
+  });
+
+  sheetRows.push([]);
+  sheetRows.push(['PROJETOS REAIS — ENCONTROS AO VIVO', '', '', '']);
+  sheetRows.push(['Projeto', 'Data', 'Link Zoom', 'Status']);
+  [['Projeto Real 01','08/07/2026'],['Projeto Real 02','05/08/2026'],
+   ['Projeto Real 03','09/09/2026'],['Projeto Real 04','07/10/2026'],
+   ['Projeto Real 05','11/11/2026'],['Projeto Real 06','02/12/2026']
+  ].forEach(function(l) { sheetRows.push([l[0], l[1], ZOOM, '']); });
+
+  /* ── Aba 2: Módulos ── */
+  var modRows = [['Módulo','Fase','Tipo','Carga horária','Data de acesso']];
+  mods.forEach(function(m) {
+    var tipo = m.tipo === 'disp' ? 'Disponível agora' : m.tipo === 'live' ? 'Ao vivo' : 'Liberado na data';
+    modRows.push([m.name, m.fase, tipo, m.ch+'h', m.data || 'Já disponível']);
+  });
+
+  /* ── Gerar XLSX ── */
+  var wb  = XLSX.utils.book_new();
+
+  var ws1 = XLSX.utils.aoa_to_sheet(sheetRows);
+  ws1['!cols'] = [{wch:8},{wch:13},{wch:13},{wch:40},{wch:22},{wch:18},{wch:17},{wch:8},{wch:14},{wch:26}];
+
+  var ws2 = XLSX.utils.aoa_to_sheet(modRows);
+  ws2['!cols'] = [{wch:40},{wch:22},{wch:18},{wch:14},{wch:17}];
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'Cronograma');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Módulos');
+
+  XLSX.writeFile(wb, 'cronograma-formacao-gp.xlsx');
+}
+
+
+document.addEventListener('mouseover', function(e){
+  if(e.target && e.target.id === 'btn-dl') e.target.style.opacity = '0.85';
+});
+document.addEventListener('mouseout', function(e){
+  if(e.target && e.target.id === 'btn-dl') e.target.style.opacity = '1';
+});
+
+
+gerar();
+</script>
+</body>
+</html>
